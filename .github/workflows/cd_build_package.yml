@@ -20,11 +20,11 @@ jobs:
           echo ::set-output name=repo_name::$(echo ${GITHUB_REPOSITORY##*/})
       - name: Capture environment variables
         run: printenv
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+      - uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         id: build_and_push
         uses: docker/build-push-action@v2
@@ -34,33 +34,10 @@ jobs:
             STEP_2_IMAGE=alpine:3.12
           file: build/docker/Dockerfile
           tags: |
-            bryannice/gitactions-slack-notification:latest
-            bryannice/gitactions-slack-notification:${{ steps.get_tag_name.outputs.tag_name }}
-      - name: Push to docker hub
+            ghcr.io/bunnyway/gitactions-slack-notification:${{ github.sha }}
+            ghcr.io/bunnyway/gitactions-slack-notification:latest
+            ghcr.io/bunnyway/gitactions-slack-notification:${{ steps.get_tag_name.outputs.tag_name }}
+      - name: Push to GHCR
         run: |
-          docker push bryannice/gitactions-slack-notification:latest
-          docker push bryannice/gitactions-slack-notification:${{ steps.get_tag_name.outputs.tag_name }}
-      - name: Update Docker Hub Description
-        uses: peter-evans/dockerhub-description@v2.4.1
-        if: success()
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-          repository: bryannice/gitactions-slack-notification
-          readme-filepath: README.md
-  logPullCiBuildDockerImage:
-    needs: pushCiBuildDockerImage
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Generate log file
-        run: |
-          curl -v -L -u runner:${{ secrets.GITHUB_TOKEN }} -o job_info.json https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${{ github.run_id }}/jobs
-          curl -v -L -u runner:${{ secrets.GITHUB_TOKEN }} -o build_logs.txt $(cat job_info.json | jq --raw-output '.jobs | .[0] | .url')/logs
-      - name: Persisting log
-        id: persisting_log
-        if: always()
-        uses: actions/upload-artifact@v1
-        with:
-          name: workflow_log
-          path: build_logs.txt
+          docker push ghcr.io/bunnyway/gitactions-slack-notification:latest
+          docker push ghcr.io/bunnyway/gitactions-slack-notification:${{ steps.get_tag_name.outputs.tag_name }}

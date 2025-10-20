@@ -1,8 +1,8 @@
 # Slack Notification
 
-Git Action to send messages to Slack. This action can be used to send message about the status of a Git Action workflow. 
+Git Action to send messages to Slack. This action can be used to send message about the status of a Git Action workflow.
 
-## Usage 
+## Usage
 
 This action can be used after any other action. Below is simple example on using it:
 
@@ -20,7 +20,7 @@ jobs:
       steps:
       - uses: actions/checkout@master
       - name: Slack Notification Demo
-        uses: bryannice/gitactions-slack-notification@2.0.0
+        uses: bunnyway/gitactions-slack-notification@0.1.0
         env:
           SLACK_INCOMING_WEBHOOK: ${{ secrets.SLACK_INCOMING_WEBHOOK }}
           SLACK_MESSAGE: 'Demo''ing the Slack Notification'
@@ -31,7 +31,7 @@ Go [here](deployment/git-actions/template_slack_notification.yml) for a template
 
 3\. Generate Slack WebHook [here](https://entelexeia.slack.com/apps/A0F7XDUAZ-incoming-webhooks?next_id=0)
 
-4\. Encrypt Slack Webhook as a secret in the repo using this app. 
+4\. Encrypt Slack Webhook as a secret in the repo using this app.
 
 
 
